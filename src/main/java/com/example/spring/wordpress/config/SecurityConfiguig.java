@@ -18,8 +18,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import com.example.spring.wordpress.oauth.service.WordpressUserService;
-import com.example.spring.wordpress.oauth.token.AccessTokenResponseClient;
+import com.example.spring.wordpress.oauth2.service.WordpressUserService;
+import com.example.spring.wordpress.oauth2.token.AccessTokenResponseClient;
 
 @Configuration
 @EnableWebSecurity

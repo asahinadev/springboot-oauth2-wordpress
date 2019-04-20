@@ -1,4 +1,4 @@
-package com.example.spring.wordpress.oauth.token;
+package com.example.spring.wordpress.oauth2.token;
 
 import java.util.Arrays;
 import java.util.HashMap;

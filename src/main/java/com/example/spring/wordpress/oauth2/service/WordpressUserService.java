@@ -1,4 +1,4 @@
-package com.example.spring.wordpress.oauth.service;
+package com.example.spring.wordpress.oauth2.service;
 
 import java.net.URI;
 import java.util.Collections;
@@ -24,7 +24,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.example.spring.wordpress.oauth.user.WordpressUser;
+import com.example.spring.wordpress.oauth2.user.WordpressUser;
 
 import lombok.extern.slf4j.Slf4j;
 
