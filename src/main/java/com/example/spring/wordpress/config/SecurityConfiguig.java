@@ -1,25 +1,14 @@
 package com.example.spring.wordpress.config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.oauth2.client.userinfo.CustomUserTypesOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.DelegatingOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
-import com.example.spring.wordpress.oauth2.service.WordpressUserService;
-import com.example.spring.wordpress.oauth2.token.AccessTokenResponseClient;
+import com.example.spring.wordpress.oauth2.user.WordpressUser;
 
 @Configuration
 @EnableWebSecurity
@@ -27,91 +16,40 @@ public class SecurityConfiguig
 		extends WebSecurityConfigurerAdapter {
 
 	@Override
-	public void configure(WebSecurity web)
-			throws Exception {
-		super.configure(web);
-
-		web.ignoring().antMatchers(
-				// webjars
-				"/webjars/**",
-				// CSS ファイル
-				"/css/**",
-				// JavaScriptファイル
-				"/js/**",
-				// 画像ファイル
-				"/img/**",
-				// サウンドファイル
-				"/sound/**",
-				// WEB フォント
-				"/font/**",
-				"/fonts/**",
-				// 外部ライブラリ
-				"/exlib/**"
-		/**/
-		);
+	public void configure(WebSecurity web) throws Exception {
+		web.ignoring().antMatchers("/webjars/**", "/assets/**");
 	}
 
 	@Override
-	protected void configure(AuthenticationManagerBuilder auth)
-			throws Exception {
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		super.configure(auth);
 	}
 
 	@Override
 	protected void configure(HttpSecurity http)
 			throws Exception {
-		super.configure(http);
+		http
+				// 認証情報
+				.authorizeRequests()
+				.anyRequest().authenticated().and()
 
-		http.formLogin().disable();
-		http.logout().disable();
+				// 認証は SSO オンリー
+				.httpBasic().disable()
+				.formLogin().disable()
+				.logout().disable()
 
-		http.httpBasic().disable();
-
-		http.csrf().disable();
-
-		http.oauth2Login()
-
-				// 認証エンドポイント
-				.authorizationEndpoint()
-				.and()
-
-				// リダイレクトエンドポイント
-				.redirectionEndpoint()
-				.and()
-
-				.tokenEndpoint()
-				.accessTokenResponseClient(new AccessTokenResponseClient())
-				.and()
+				// 認証関連ページは CSRF 対象外
+				.csrf().ignoringAntMatchers(
+						"/login",
+						"/login/**",
+						"/sso/**",
+						"/oauth/**",
+						"/oauth1/**",
+						"/oauth2/**")
+				.csrfTokenRepository(new HttpSessionCsrfTokenRepository()).and()
 
 				// ユーザー情報エンドポイント
-				.userInfoEndpoint()
-				// see this.userService()
-				// .customUserType(WordpressUser.class, "dropbox")
-				.userService(userService())
-				.and()
-
-		;
-
+				.oauth2Login().userInfoEndpoint()
+				.customUserType(WordpressUser.class, "wordpress");
 	}
-
-	private DelegatingOAuth2UserService<OAuth2UserRequest, OAuth2User> userService() {
-		Map<String, Class<? extends OAuth2User>> customUser = new HashMap<>();
-
-		List<OAuth2UserService<OAuth2UserRequest, OAuth2User>> userServices = new ArrayList<>();
-
-		// Wordpress 専用
-		userServices.add(new WordpressUserService());
-
-		// Custom UserService 
-		if (customUser.isEmpty() == false) {
-			userServices.add(new CustomUserTypesOAuth2UserService(customUser));
-		}
-
-		// Default UserService
-		userServices.add(new DefaultOAuth2UserService());
-
-		// 作成
-		return new DelegatingOAuth2UserService<>(userServices);
-	}
-
 }
