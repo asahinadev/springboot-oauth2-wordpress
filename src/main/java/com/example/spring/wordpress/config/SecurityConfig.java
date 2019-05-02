@@ -12,7 +12,7 @@ import com.example.spring.wordpress.oauth2.user.WordpressUser;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguig
+public class SecurityConfig
 		extends WebSecurityConfigurerAdapter {
 
 	@Override
